@@ -14,9 +14,9 @@
 
 import Foundation
 
-internal class SessionLocalStorage {
+public class SessionLocalStorage {
 
-    internal class func save(session: Session?) {
+    public class func save(session: Session?) {
         guard let session = session else {
             return
         }
