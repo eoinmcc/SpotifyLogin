@@ -26,9 +26,9 @@ public class SpotifyLogin {
         return session?.username
     }
 
-    private var clientID: String?
-    private var clientSecret: String?
-    private var redirectURL: URL?
+    public var clientID: String?
+    public var clientSecret: String?
+    public var redirectURL: URL?
 
     public var session: Session? {
         didSet {
@@ -38,7 +38,7 @@ public class SpotifyLogin {
 
     weak internal var safariVC: SFSafariViewController?
 
-    internal var urlBuilder: URLBuilder?
+    public var urlBuilder: URLBuilder?
 
     private init() {
         session = SessionLocalStorage.loadSession()

@@ -14,7 +14,7 @@
 
 import Foundation
 
-internal class URLBuilder {
+public class URLBuilder {
 
     let clientID: String
     let clientSecret: String
@@ -32,7 +32,7 @@ internal class URLBuilder {
 
     // MARK: URL functions
 
-    internal func authenticationURL(type: AuthenticationURLType, scopes: [Scope]) -> URL? {
+    public func authenticationURL(type: AuthenticationURLType, scopes: [Scope]) -> URL? {
         let endpoint = type.rawValue
         let scopeStrings = scopes.map({$0.rawValue})
 
