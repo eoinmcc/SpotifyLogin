@@ -14,13 +14,13 @@
 
 import Foundation
 
-internal struct Session: Codable {
+public struct Session: Codable {
     let username: String
     let accessToken: String
     var refreshToken: String?
     let expirationDate: Date
 
-    internal func isValid() -> Bool {
+    func isValid() -> Bool {
         return Date().compare(expirationDate) == .orderedAscending
     }
 }

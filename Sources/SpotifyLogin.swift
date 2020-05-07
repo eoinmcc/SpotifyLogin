@@ -30,7 +30,7 @@ public class SpotifyLogin {
     private var clientSecret: String?
     private var redirectURL: URL?
 
-    internal var session: Session? {
+    public var session: Session? {
         didSet {
             SessionLocalStorage.save(session: session)
         }

@@ -28,10 +28,6 @@ public enum Scope: String {
     // Spotify native SDKs (for example, the iOS SDK and the Android SDK). The user must
     // have a Spotify Premium account.
     case streaming = "streaming"
-    /// Control playback of a Spotify track. This scope is currently available to Spotify
-    // Playback SDKs, including the iOS SDK, Android SDK and Web Playback SDK. The user
-    // must have a Spotify Premium account.
-    case appRemoteControl = "app-remote-control"
     /// Write/delete access to the list of artists and other users that the user follows.
     case userFollowModify = "user-follow-modify"
     /// Read access to the list of artists and other users that the user follows.
