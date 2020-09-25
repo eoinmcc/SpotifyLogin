@@ -27,7 +27,9 @@ public class SpotifyLogin {
     }
 
     public var clientID: String?
-    public var clientSecret: String?
+//    public var clientSecret: String?
+    public var tokenSwapURL: URL?
+    public var tokenRefreshURL: URL?
     public var redirectURL: URL?
 
     public var session: Session? {
@@ -52,12 +54,14 @@ public class SpotifyLogin {
     ///   - clientID: App's client id.
     ///   - clientSecret: App's client secret.
     ///   - redirectURL: App's redirect url.
-    public func configure(clientID: String, clientSecret: String, redirectURL: URL, showDialog: Bool? = true) {
+    public func configure(clientID: String, tokenSwapURL: URL, tokenRefreshURL: URL, redirectURL: URL, showDialog: Bool? = true) {
         self.clientID = clientID
-        self.clientSecret = clientSecret
+        self.tokenSwapURL = tokenSwapURL
+        self.tokenRefreshURL = tokenRefreshURL
         self.redirectURL = redirectURL
         self.urlBuilder = URLBuilder(clientID: clientID,
-                                     clientSecret: clientSecret,
+                                     tokenSwapURL: tokenSwapURL,
+                                     tokenRefreshURL: tokenRefreshURL,
                                      redirectURL: redirectURL,
                                      showDialog: showDialog!)
     }
@@ -67,7 +71,7 @@ public class SpotifyLogin {
     /// - Parameter completion: Returns the auth token as a string if available and an optional error.
     public func getAccessToken(completion:@escaping (String?, Error?) -> Void) {
         // If the login object is not fully configured, return an error
-        guard redirectURL != nil, let clientID = clientID, let clientSecret = clientSecret else {
+        guard redirectURL != nil, let clientID = clientID else {
             completion(nil, LoginError.configurationMissing)
             return
         }
@@ -82,8 +86,6 @@ public class SpotifyLogin {
             return
         } else {
             Networking.renewSession(session: session,
-                                    clientID: clientID,
-                                    clientSecret: clientSecret,
                                     completion: { [weak self] session, error in
                 if let session = session, error == nil {
                     self?.session = session
@@ -110,8 +112,7 @@ public class SpotifyLogin {
     public func applicationOpenURL(_ url: URL, completion: @escaping (Error?) -> Void) -> Bool {
         guard let urlBuilder = urlBuilder,
             let redirectURL = redirectURL,
-            let clientID = clientID,
-            let clientSecret = clientSecret else {
+            let clientID = clientID else {
             DispatchQueue.main.async {
                 completion(LoginError.configurationMissing)
             }
@@ -130,9 +131,6 @@ public class SpotifyLogin {
         let parsedURL = urlBuilder.parse(url: url)
         if let code = parsedURL.code, !parsedURL.error {
             Networking.createSession(code: code,
-                                     redirectURL: redirectURL,
-                                     clientID: clientID,
-                                     clientSecret: clientSecret,
                                      completion: { [weak self] session, error in
                 DispatchQueue.main.async {
                     if error == nil {

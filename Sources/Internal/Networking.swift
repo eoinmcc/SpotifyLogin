@@ -46,14 +46,10 @@ internal struct ProfileEndpointResponse: Codable {
 internal class Networking {
 
     internal class func createSession(code: String,
-                                      redirectURL: URL,
-                                      clientID: String,
-                                      clientSecret: String,
                                       completion: @escaping (Session?, Error?) -> Void) {
-        let requestBody = "code=\(code)&grant_type=authorization_code&redirect_uri=\(redirectURL.absoluteString)"
-        Networking.authRequest(requestBody: requestBody,
-                               clientID: clientID,
-                               clientSecret: clientSecret) { response, error in
+//        let requestBody = "code=\(code)&grant_type=authorization_code&redirect_uri=\(redirectURL.absoluteString)"
+        let requestBody = "code=\(code)"
+        Networking.tokenSwapRequest(requestBody: requestBody) { response, error in
             if let response = response, error == nil {
                 Networking.profileUsernameRequest(accessToken: response.accessToken, completion: { username in
                     if let username = username {
@@ -75,8 +71,6 @@ internal class Networking {
     }
 
     internal class func renewSession(session: Session?,
-                                     clientID: String,
-                                     clientSecret: String,
                                      completion: @escaping (Session?, Error?) -> Void) {
         guard let session = session, let refreshToken = session.refreshToken else {
             DispatchQueue.main.async {
@@ -84,11 +78,10 @@ internal class Networking {
             }
             return
         }
-        let requestBody = "grant_type=refresh_token&refresh_token=\(refreshToken)"
+        let requestBody = "refresh_token=\(refreshToken)"
+//        let requestBody = "grant_type=refresh_token&refresh_token=\(refreshToken)"
 
-        Networking.authRequest(requestBody: requestBody,
-                               clientID: clientID,
-                               clientSecret: clientSecret) { response, error in
+        Networking.tokenRefreshRequest(requestBody: requestBody) { response, error in
             if let response = response, error == nil {
                 let session = Session(username: session.username,
                                       accessToken: response.accessToken,
@@ -168,5 +161,57 @@ internal class Networking {
         })
         task.resume()
     }
+    
+    internal class func tokenSwapRequest(requestBody: String,
+                                    completion: @escaping (TokenEndpointResponse?, Error?) -> Void) {
+        let endpoint = SpotifyLogin.shared.tokenSwapURL!
+        var urlRequest = URLRequest(url: endpoint)
+        urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "content-type")
+        urlRequest.httpMethod = "POST"
+
+        urlRequest.httpBody = requestBody.data(using: .utf8)
+
+        let task = URLSession.shared.dataTask(with: urlRequest,
+                                              completionHandler: { (data, _, error) in
+            if let data = data,
+                let authResponse = try? JSONDecoder().decode(TokenEndpointResponse.self, from: data), error == nil {
+                DispatchQueue.main.async {
+                    completion(authResponse, error)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(nil, error)
+                }
+            }
+        })
+        task.resume()
+    }
+    
+    internal class func tokenRefreshRequest(requestBody: String,
+                                    completion: @escaping (TokenEndpointResponse?, Error?) -> Void) {
+        let endpoint = SpotifyLogin.shared.tokenRefreshURL!
+        var urlRequest = URLRequest(url: endpoint)
+        urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "content-type")
+        urlRequest.httpMethod = "POST"
+
+        urlRequest.httpBody = requestBody.data(using: .utf8)
+
+        let task = URLSession.shared.dataTask(with: urlRequest,
+                                              completionHandler: { (data, _, error) in
+            if let data = data,
+                let authResponse = try? JSONDecoder().decode(TokenEndpointResponse.self, from: data), error == nil {
+                DispatchQueue.main.async {
+                    completion(authResponse, error)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    completion(nil, error)
+                }
+            }
+        })
+        task.resume()
+    }
+    
+    
 
 }
